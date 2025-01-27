@@ -8,8 +8,20 @@ const FormCheckBox = ({ ...props }: { name: string; label?: string }) => {
       name={props.name as string}
       render={({ field }) => (
         <FormControlLabel
-          control={<Checkbox {...field} checked={field.value} />}
+          control={
+            <Checkbox
+              {...field}
+              checked={field.value}
+              sx={{
+                borderRadius: '8px', // تنظیم Border Radius چک‌باکس
+                padding: 0, // تنظیم فاصله داخلی چک‌باکس
+              }}
+            />
+          }
           label={props.label ? props.label : ''}
+          sx={{
+            gap: '8px', // فاصله بین چک‌باکس و لیبل
+          }}
         />
       )}
     />
