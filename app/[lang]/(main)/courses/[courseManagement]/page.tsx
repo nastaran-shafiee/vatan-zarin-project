@@ -14,18 +14,19 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import TextFiledFileUpload from "#/ui/component/common/TextFiledFileUpload";
 import FormInputText from "#/ui/component/common/FormTextFiled";
 import { FormProvider, useForm } from "react-hook-form";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { OutLinedTextField } from "#/ui/component/common/OutLinedTextField";
 import FormSelect from "#/ui/component/common/FormSelect";
+import { ContentRepositoryModal } from "../component/contentRepositoryModal";
 
 const CourseManagement = () => {
   const params = useParams();
   const courseManagement = params?.courseManagement;
   const router = useRouter();
   const t = useTranslations();
-
+  const [open, setOpen] = useState(false);
   const schema = useMemo(
     () =>
       yup.object().shape({
@@ -38,6 +39,10 @@ const CourseManagement = () => {
     resolver: yupResolver(schema),
     reValidateMode: "onSubmit",
   });
+
+  const handleModalOpen = () => {
+    setOpen(!open);
+  };
 
   return (
     <Container maxWidth="md" sx={{ px: 0 }}>
@@ -101,11 +106,18 @@ const CourseManagement = () => {
             paddingY: "24px",
           }}
         >
-          <Button variant="contained" color="primary" fullWidth sx={{paddingY:"7.5px"}}>
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ paddingY: "7.5px" }}
+            onClick={handleModalOpen}
+          >
             ارسال دوره
           </Button>
         </Box>
       </FormProvider>
+      <ContentRepositoryModal open={open} handleOpen={handleModalOpen} />
     </Container>
   );
 };
