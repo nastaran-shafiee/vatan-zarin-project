@@ -1,3 +1,4 @@
+"use client";
 import { changeTheme } from "#/redux/features/settingSlice";
 import { useAppDispatch, useAppSelector } from "#/redux/hooks";
 import { useGetAllCourseQuery } from "#/redux/services/CoursesApi";
@@ -13,14 +14,23 @@ import {
   useTheme,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { useParams, useRouter } from "next/navigation";
+
 
 export default function Courses() {
+  const router = useRouter();
   const t = useTranslations();
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const { data: getAllCourses, isLoading } = useGetAllCourseQuery();
   const themeIcon = window.localStorage.getItem("pmlm-dark-theme");
-  
+  const { lang } = useParams();
+
+// function for add course
+const handleAddClick=()=>{
+  router.push(`/${lang}/courses/add`);
+}
+
   return (
     <>
       <Header
@@ -28,11 +38,10 @@ export default function Courses() {
         changeTheme={() => dispatch(changeTheme())}
         themeIcon={themeIcon || ""}
       />
-
+    
       <Container fixed sx={{ "&.MuiContainer-root": { px: 0 } }}>
         {" "}
         {isLoading && <LinearProgress />}
-       
         <Grid container display="flex" justifyContent="space-between" mt={2}>
           {getAllCourses?.result?.map((courseItems: any, index: number) => (
             <CourseBox courseItems={courseItems} key={index} />
@@ -70,9 +79,12 @@ export default function Courses() {
           minHeight: "56px",
           borderRadius: "50%",
         }}
-        onClick={() => {}}
+        onClick={handleAddClick}
       >
-        <AcademyIcon src={"icon-plus"} />
+        <AcademyIcon
+          src={"icon-plus"}
+         
+        />
       </LoadingButton>
     </>
   );
