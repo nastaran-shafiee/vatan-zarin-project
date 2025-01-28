@@ -12,6 +12,9 @@ import {
 import { useMemo, useState } from "react";
 import { AddContent } from "../component/addContent";
 import AddCover from "../component/addCover";
+import { Container } from "@mui/material";
+import Header from "#/ui/component/common/Header";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const CourseManagement = () => {
   const [showAddContent, setShowAddContent] = useState(false); // نمایش AddContent پس از ارسال موفقیت‌آمیز
@@ -70,14 +73,22 @@ const CourseManagement = () => {
   
   return (
     <>
+    <Container maxWidth="md" sx={{ px: 0 }}>
+      {/* Header */}
+      <Header
+        text={t("add_courses")}
+        isTheme={false}
+        customNode={<ArrowForwardIosIcon width="28px" height="28px" />}
+      />
       {/* نمایش AddContent بعد از ارسال موفقیت‌آمیز فرم */}
-      {showAddContent ? (
+      {!showAddContent ? (
         <AddContent />
       ) : (
         <AddCover
         {...addCoverProps}
         />
       )}
+         </Container>
     </>
   );
 };

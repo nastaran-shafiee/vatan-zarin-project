@@ -5,8 +5,7 @@ import { useTranslations } from "next-intl";
 import { FormProvider, UseFormReturn, UseFormSetValue } from "react-hook-form";
 import FormInputText from "#/ui/component/common/FormTextFiled";
 import TextFiledFileUpload from "#/ui/component/common/TextFiledFileUpload";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import Header from "#/ui/component/common/Header";
+
 import FormSelect from "#/ui/component/common/FormSelect";
 
 interface FormData {
@@ -49,15 +48,8 @@ const AddCover: React.FC<AddCoverProps> = ({
   const theme = useTheme();
 
   return (
-    <Container maxWidth="md" sx={{ px: 0 }}>
-      {/* Header */}
-      <Header
-        text={t("add_courses")}
-        isTheme={false}
-        customNode={<ArrowForwardIosIcon width="28px" height="28px" />}
-      />
-
-      {/* Cover Upload */}
+    
+      <>{/* Cover Upload */}
       <Box
         sx={{
           marginTop: "16px",
@@ -175,8 +167,8 @@ const AddCover: React.FC<AddCoverProps> = ({
             </Button>
           </Box>
         </form>
-      </FormProvider>
-    </Container>
+      </FormProvider></>
+ 
   );
 };
 
