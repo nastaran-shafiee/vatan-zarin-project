@@ -1,18 +1,29 @@
 "use client";
-import { Grid, Typography, useTheme, Button, Stack } from "@mui/material";
-import { FC } from "react";
-import icon2 from "#/public/images/i2.png";
+import { Grid, Typography, useTheme, Button } from "@mui/material";
+import { FC, ReactNode } from "react";
+import defaultIcon from "#/public/images/i2.png"; // Default image
 import Image from "next/image";
-import { AcademyIcon } from "../AcademyIcon";
+import { useRouter } from "next/navigation"; // For navigation
 
 type PropsType = {
   text?: string;
-  changeTheme: () => void;
-  themeIcon: string;
+  changeTheme?: () => void;
+  themeIcon?: string;
+  isTheme?: boolean;
+  customNode?: ReactNode; // Allow icon or image via ReactNode
+  onImageClick?: () => void; // Handle click on the customNode or image
 };
 
-const Header: FC<PropsType> = ({ text, changeTheme, themeIcon }) => {
+const Header: FC<PropsType> = ({
+  text,
+  changeTheme,
+  themeIcon,
+  isTheme,
+  customNode,
+  onImageClick,
+}) => {
   const theme = useTheme();
+  const router = useRouter();
 
   return (
     <Grid
@@ -26,22 +37,46 @@ const Header: FC<PropsType> = ({ text, changeTheme, themeIcon }) => {
       }}
     >
       <Grid display="flex" alignItems="center">
+        {/* Custom Icon/Image or Default */}
         <Grid
-          sx={[
-            theme.direction === "rtl" ? { mr: 2, ml: 1.5 } : { ml: 2, mr: 1.5 },
-          ]}
+          onClick={onImageClick}
+          sx={{
+            alignSelf:"end" ,
+            cursor: onImageClick ? "pointer" : "default",
+            ...(theme.direction === "rtl" ? { mr: 2, ml: 1.5 } : { ml: 2, mr: 1.5 }),
+          }}
         >
-          <Image width={35} height={35} src={icon2} alt="course" />
+          {customNode ? (
+            customNode // Render custom icon/image
+          ) : (
+            <Image
+              width={35}
+              height={35}
+              src={defaultIcon} // Default image
+              alt="icon"
+            />
+          )}
         </Grid>
+
+        {/* Header Title */}
         <Typography variant="h6">{text}</Typography>
       </Grid>
-      <Button onClick={changeTheme} sx={{ p: 0, minWidth: "auto" }}>
-        <AcademyIcon
-          src={themeIcon === "ok" ? "icon-brightening" : "icon-moon-light"}
-          color={theme.palette.grey[700]}
-        />
-      </Button>
+
+      {/* Theme Toggle Button */}
+      {isTheme && (
+        <Button onClick={changeTheme} sx={{ p: 0, minWidth: "auto" }}>
+          <Typography
+            sx={{
+              color: theme.palette.grey[700],
+            }}
+          >
+            {themeIcon === "ok" ? "🌞" : "🌙"}
+          </Typography>
+        </Button>
+      )}
     </Grid>
   );
 };
+
 export default Header;
+

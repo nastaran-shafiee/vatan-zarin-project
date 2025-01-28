@@ -3,39 +3,25 @@ import {
   IconButton,
   Stack,
   useTheme,
-  CircularProgress,
+  Box,
+  LinearProgress,
+  Typography,
 } from "@mui/material";
-import {
-  useState,
-  SetStateAction,
-  Dispatch,
-  useEffect,
-  ChangeEvent,
-} from "react";
+import { useState, SetStateAction, Dispatch, useEffect, ChangeEvent } from "react";
 import Image from "next/image";
 import fileUploaderSrc from "#/public/images/fileuploader.svg";
-import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
 import { AcademyIcon } from "#/ui/component/common/AcademyIcon";
 import { PreviewModal } from "#/ui/component/common/TextFiledFileUpload/PreviewModal";
 import { useUploadFileMutation } from "#/redux/services/UploadApi";
-import Box from "@mui/material/Box";
-import LinearProgress from "@mui/material/LinearProgress";
-import {
-  setAlert,
-  setError,
-  setMessage,
-} from "#/redux/features/snackBarHandlerSlice";
+import { setAlert, setError, setMessage } from "#/redux/features/snackBarHandlerSlice";
 import { useAppDispatch } from "#/redux/hooks";
 
 type fileUploadPropsType = {
   setFileGuId?: Dispatch<SetStateAction<string[] | any>>;
   label?: string;
-  imageResizeType?: number;
   resetInput?: boolean;
   previewValue?: string;
-  HasThumb?: boolean;
-  typeFile?: string;
   multiple?: boolean;
   title?: string;
   isRequired?: boolean;
@@ -44,11 +30,12 @@ type fileUploadPropsType = {
   accept?: string;
   previewModalValue?: string | string[];
   onRemove?: () => void;
+  sizeFile?: number;
+  iconColor?: string;
 };
 
 const TextFiledFileUpload = ({
   isRequired = false,
-  typeFile = "",
   setFileGuId,
   label,
   resetInput,
@@ -60,6 +47,8 @@ const TextFiledFileUpload = ({
   accept,
   onRemove,
   previewModalValue,
+  sizeFile = 100 * 1024 * 1024, // 100MB as default size
+  iconColor,
 }: fileUploadPropsType) => {
   const [preview, setPreview] = useState<string | undefined>(previewValue);
   const [uploadFile, { data, reset }] = useUploadFileMutation();
@@ -89,14 +78,21 @@ const TextFiledFileUpload = ({
     if (event.target.files) {
       const _files = Array.from(event.target.files);
 
-      // Check file size (100MB limit)
-      const oversizedFiles = _files.filter(
-        (file) => file.size > 100 * 1024 * 1024
-      );
+      // Check file size
+      const oversizedFiles = _files.filter((file) => file.size > sizeFile);
+
       if (oversizedFiles.length > 0) {
+        const fileSizeInKB = oversizedFiles[0].size / 1024; // Convert to KB
+        const fileSizeInMB = fileSizeInKB / 1024; // Convert to MB
+
+        // Dynamically create the size message
+        const sizeMessage = fileSizeInMB >= 1
+          ? `${fileSizeInMB.toFixed(2)} MB`
+          : `${fileSizeInKB.toFixed(2)} KB`;
+
         dispatch(setAlert(true));
         dispatch(setError(true));
-        dispatch(setMessage(t("limit_100mb")));
+        dispatch(setMessage(t("limit_exceeded", { size: sizeMessage }))); // Dynamically set the message
         return;
       }
 
@@ -136,8 +132,14 @@ const TextFiledFileUpload = ({
       <Typography
         component={"span"}
         variant={"subtitle2"}
+        color={"text.primary"}
+        fontWeight={"fontWeightMedium"}
         sx={[
-          { pb: 1, display: "block", width: "fit-content" },
+          {
+            pb: 1,
+            display: "block",
+            width: "fit-content",
+          },
           isRequired && {
             position: "relative",
             "&::before": {
@@ -190,7 +192,7 @@ const TextFiledFileUpload = ({
             <IconButton onClick={() => setOpen(!open)}>
               <AcademyIcon
                 src={"icon-typeeye-solid"}
-                color={theme.palette.text.primary}
+                color={iconColor || theme.palette.text.primary}
               />
             </IconButton>
 
@@ -203,13 +205,12 @@ const TextFiledFileUpload = ({
             >
               <AcademyIcon
                 src={"icon-typetrash-can"}
-                color={theme.palette.text.primary}
+                color={iconColor || theme.palette.text.primary}
               />
             </IconButton>
             <PreviewModal
               open={open}
               handleOpen={() => setOpen(!open)}
-              typeFile={typeFile}
               previewUrl={previewModalValue}
               preview={preview}
             />
@@ -262,12 +263,16 @@ const TextFiledFileUpload = ({
               justifyContent={"center"}
               mr={1}
             >
-              <Typography variant={"subtitle2"} color={theme.palette.grey[800]}>
+              <Typography
+                variant={"subtitle2"}
+                color={"text.primary"}
+                fontWeight={"fontWeightMedium"}
+              >
                 {label}
               </Typography>
               <Typography variant={"caption"} color={theme.palette.grey[700]}>
                 {allowedFormat ||
-                  `${t("Allowed_formats")} ${t("Allowed_Volume")}`}
+                  `${t("Allowed_formats")} ${t("Allowed_Volume", { size: sizeFile / (1024 * 1024) })}`} {/* Size in MB */}
               </Typography>
             </Stack>
           </Stack>
