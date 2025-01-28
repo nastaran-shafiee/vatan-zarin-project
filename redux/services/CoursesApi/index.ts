@@ -14,7 +14,7 @@ export const courseApi = createApi({
     baseUrl: process.env.NEXT_PUBLIC_API_HOST + "/Courses",
     prepareHeaders: prepareHeaders,
   }),
-  tagTypes: ["getAllCourse"],
+  tagTypes: ["getAllCourse", "getAllRank", "getAllLanguage"],
   endpoints: (builder) => ({
     getAllCourse: builder.query<response, void>({
       query: () => ({
@@ -23,7 +23,21 @@ export const courseApi = createApi({
       }),
       providesTags: ["getAllCourse"],
     }),
+    getAllRank: builder.query<response, void>({
+      query: () => ({
+        url: `/getAllRank`,
+        method: "GET",
+      }),
+      providesTags: ["getAllRank"],
+    }),
 
+    getAllLanguage: builder.query<response, void>({
+      query: () => ({
+        url: `/getAllLanguage`,
+        method: "GET",
+      }),
+      providesTags: ["getAllLanguage"],
+    }),
     publish: builder.mutation<responsePublish, CourseIdParamsType>({
       query: ({ courseId }: CourseIdParamsType) => ({
         url: `/${courseId}/publish`,
@@ -31,10 +45,50 @@ export const courseApi = createApi({
       }),
       invalidatesTags: ["getAllCourse"],
     }),
+
     unPublish: builder.mutation<responseUnPublish, CourseIdParamsType>({
       query: ({ courseId }: CourseIdParamsType) => ({
         url: `/${courseId}/unPublish`,
         method: "POST",
+      }),
+      invalidatesTags: ["getAllCourse"],
+    }),
+
+    // New endpoints
+
+
+
+    uploadFile: builder.mutation<response, FormData>({
+      query: (formData) => ({
+        url: `/upload`,
+        method: "POST",
+        body: formData,
+      }),
+    }),
+
+    addCourse: builder.mutation<response, {
+      coverId: string;
+      title: string;
+      description: string;
+      languageId: string;
+      rankId: string;
+    }>({
+      query: (body) => ({
+        url: `/addCourse`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["getAllCourse"],
+    }),
+
+    addContentToCourse: builder.mutation<response, {
+      courseId: string;
+      contents: { contentId: string }[];
+    }>({
+      query: (body) => ({
+        url: `/addContentToCourse`,
+        method: "POST",
+        body,
       }),
       invalidatesTags: ["getAllCourse"],
     }),
@@ -43,6 +97,11 @@ export const courseApi = createApi({
 
 export const {
   useGetAllCourseQuery,
-  useUnPublishMutation,
   usePublishMutation,
+  useUnPublishMutation,
+  useGetAllRankQuery,
+  useGetAllLanguageQuery,
+  useUploadFileMutation,
+  useAddCourseMutation,
+  useAddContentToCourseMutation,
 } = courseApi;

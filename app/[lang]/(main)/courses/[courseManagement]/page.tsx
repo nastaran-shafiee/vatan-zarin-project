@@ -1,127 +1,85 @@
 "use client";
-import Header from "#/ui/component/common/Header";
-import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  LinearProgress,
-  Typography,
-} from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useParams, useRouter } from "next/navigation";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import TextFiledFileUpload from "#/ui/component/common/TextFiledFileUpload";
-import FormInputText from "#/ui/component/common/FormTextFiled";
-import { FormProvider, useForm } from "react-hook-form";
-import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { OutLinedTextField } from "#/ui/component/common/OutLinedTextField";
-import FormSelect from "#/ui/component/common/FormSelect";
-import { ContentRepositoryModal } from "../component/contentRepositoryModal";
+import {
+  useGetAllLanguageQuery,
+  useGetAllRankQuery,
+  useAddCourseMutation,
+} from "#/redux/services/CoursesApi";
+import { useMemo, useState } from "react";
+import { AddContent } from "../component/addContent";
+import AddCover from "../component/addCover";
 
 const CourseManagement = () => {
-  const params = useParams();
-  const courseManagement = params?.courseManagement;
-  const router = useRouter();
+  const [showAddContent, setShowAddContent] = useState(false); // نمایش AddContent پس از ارسال موفقیت‌آمیز
   const t = useTranslations();
-  const [open, setOpen] = useState(false);
-  const schema = useMemo(
-    () =>
-      yup.object().shape({
-        username: yup.string().required(t("F_PorKardanElzami")),
-        password: yup.string().required(t("F_PorKardanElzami")),
-      }),
-    [t]
-  );
+
+  const schema = useMemo(() => {
+    return yup.object({
+      coverId: yup.string().required(t("F_PorKardanElzami")),
+      title: yup.string().required(t("F_PorKardanElzami")),
+      description: yup.string().required(t("F_PorKardanElzami")),
+      languageId: yup.string().required(t("F_PorKardanElzami")),
+      rankId: yup.string().required(t("F_PorKardanElzami")),
+    });
+  }, [t]);
+
   const methods = useForm({
     resolver: yupResolver(schema),
     reValidateMode: "onSubmit",
   });
 
-  const handleModalOpen = () => {
-    setOpen(!open);
+  const {
+    setValue,
+    formState: { errors },
+  } = methods;
+
+  // API hooks
+  const { data: languages, isLoading: isLanguagesLoading } =
+    useGetAllLanguageQuery();
+  const { data: ranks, isLoading: isRanksLoading } = useGetAllRankQuery();
+  const [addCourse, { isLoading: isSubmitting }] = useAddCourseMutation();
+  const onSubmit = async (data: any) => {
+    try {
+      const response = await addCourse(data).unwrap(); // ارسال درخواست به API
+  
+      if (response?.isSuccess) { // اگر کد پاسخ 200 باشد
+        setShowAddContent(true); // AddContent نمایش داده شود
+      } else {
+        alert(t("Unexpected_response_code")); // اگر کد پاسخ متفاوت بود، پیام مناسب نمایش دهید
+      }
+    } catch (error: any) {
+      console.error("Error adding course:", error);
+      alert(t("Error_adding_course"));
+    }
   };
-
+  const addCoverProps = {
+    methods,
+    onSubmit,
+    isLanguagesLoading,
+    languages,
+    isRanksLoading,
+    ranks,
+    setValue,
+    errors,
+    isSubmitting,
+  };
+  
   return (
-    <Container maxWidth="md" sx={{ px: 0 }}>
-      <Header
-        text={t("List_courses")}
-        isTheme={false}
-        customNode={
-          <ArrowForwardIosIcon
-            width="28px"
-            height="28px"
-            onClick={() => router.back()}
-          />
-        } // Custom back icon
-      />
-
-      <Box
-        sx={{
-          marginTop: "16px",
-          marginBottom: "20px",
-          bgcolor: "background.paper",
-          paddingX: "8px",
-          paddingY: "24px",
-        }}
-      >
-        <TextFiledFileUpload
-          title="کاور"
-          isRequired={true}
-          label="افزودن کاور"
+    <>
+      {/* نمایش AddContent بعد از ارسال موفقیت‌آمیز فرم */}
+      {showAddContent ? (
+        <AddContent />
+      ) : (
+        <AddCover
+        {...addCoverProps}
         />
-      </Box>
-      <FormProvider {...methods}>
-        <Box
-          sx={{
-            marginTop: "16px",
-            marginBottom: "20px",
-            bgcolor: "background.paper",
-            paddingX: "8px",
-            paddingY: "24px",
-          }}
-        >
-          <Typography variant="h6">اطلاعات دوره</Typography>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "18px",
-              marginY: "24px",
-            }}
-          >
-            <OutLinedTextField label={"نام دوره"} name={"name"} required />
-            <OutLinedTextField label={" توضیحات"} name={"name"} required />
-            <FormSelect name="" label="زبان " required />
-            <FormSelect name="" label="حداقل رنک " required />
-          </Box>
-        </Box>
-        <Box
-          sx={{
-            marginTop: "16px",
-            bgcolor: "background.paper",
-            paddingX: "8px",
-            paddingY: "24px",
-          }}
-        >
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ paddingY: "7.5px" }}
-            onClick={handleModalOpen}
-          >
-            ارسال دوره
-          </Button>
-        </Box>
-      </FormProvider>
-      <ContentRepositoryModal open={open} handleOpen={handleModalOpen} />
-    </Container>
+      )}
+    </>
   );
 };
 
 export default CourseManagement;
-
-

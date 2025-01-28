@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation"; // For navigation
 
 type PropsType = {
   text?: string;
-  changeTheme: () => void;
-  themeIcon: string;
+  changeTheme?: () => void;
+  themeIcon?: string;
   isTheme?: boolean;
   customNode?: ReactNode; // Allow icon or image via ReactNode
   onImageClick?: () => void; // Handle click on the customNode or image

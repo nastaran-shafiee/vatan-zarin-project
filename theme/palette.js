@@ -76,6 +76,12 @@ const ERROR = {
 };
 
 const palette = {
+  border: {
+    light: GREY[300],
+    neutral: GREY[200],
+    badgeBorder6: referenceColors['badgeBorderState6'],
+    badgeBorder7: referenceColors['badgeBorderState7'],
+  },
   common: { black: referenceColors['Base2'], white: referenceColors['Base1'] },
   badge: {
     state1: referenceColors['badgeState1'],
@@ -102,6 +108,7 @@ const palette = {
   warning: WARNING,
   error: ERROR,
   grey: GREY,
+  
   divider: alpha(GREY[500], 0.24),
   text: {
     primary: GREY[800],
@@ -117,12 +124,7 @@ const palette = {
     lightGray: GREY[200],
     mainLighter: referenceColors['badgeState3'],
   },
-  border: {
-    light: GREY[300],
-    neutral: GREY[200],
-    badgeBorder6: referenceColors['badgeBorderState6'],
-    badgeBorder7: referenceColors['badgeBorderState7'],
-  },
+  
   action: {
     active: GREY[600],
     hover: alpha(GREY[500], 0.08),
@@ -133,6 +135,7 @@ const palette = {
     hoverOpacity: 0.08,
     disabledOpacity: 0.48,
   },
+ 
 };
 
 export default palette;
