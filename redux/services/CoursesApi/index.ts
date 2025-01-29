@@ -14,7 +14,7 @@ export const courseApi = createApi({
     baseUrl: process.env.NEXT_PUBLIC_API_HOST + "/Courses",
     prepareHeaders: prepareHeaders,
   }),
-  tagTypes: ["getAllCourse", "getAllRank", "getAllLanguage"],
+  tagTypes: ["getAllCourse", "getAllRank", "getAllLanguage", "getAllContent"],
   endpoints: (builder) => ({
     getAllCourse: builder.query<response, void>({
       query: () => ({
@@ -30,7 +30,6 @@ export const courseApi = createApi({
       }),
       providesTags: ["getAllRank"],
     }),
-
     getAllLanguage: builder.query<response, void>({
       query: () => ({
         url: `/getAllLanguage`,
@@ -53,11 +52,14 @@ export const courseApi = createApi({
       }),
       invalidatesTags: ["getAllCourse"],
     }),
-
-    // New endpoints
-
-
-
+    // New endpoint: getAllContent
+    getAllContent: builder.query<response, void>({
+      query: () => ({
+        url: `/getAllContent`,
+        method: "GET",
+      }),
+      providesTags: ["getAllContent"],
+    }),
     uploadFile: builder.mutation<response, FormData>({
       query: (formData) => ({
         url: `/upload`,
@@ -65,14 +67,16 @@ export const courseApi = createApi({
         body: formData,
       }),
     }),
-
-    addCourse: builder.mutation<response, {
-      coverId: string;
-      title: string;
-      description: string;
-      languageId: string;
-      rankId: string;
-    }>({
+    addCourse: builder.mutation<
+      response,
+      {
+        coverId: string;
+        title: string;
+        description: string;
+        languageId: string;
+        rankId: string;
+      }
+    >({
       query: (body) => ({
         url: `/addCourse`,
         method: "POST",
@@ -80,11 +84,13 @@ export const courseApi = createApi({
       }),
       invalidatesTags: ["getAllCourse"],
     }),
-
-    addContentToCourse: builder.mutation<response, {
-      courseId: string;
-      contents: { contentId: string }[];
-    }>({
+    addContentToCourse: builder.mutation<
+      response,
+      {
+        courseId: string;
+        contents: { contentId: string }[];
+      }
+    >({
       query: (body) => ({
         url: `/addContentToCourse`,
         method: "POST",
@@ -104,4 +110,5 @@ export const {
   useUploadFileMutation,
   useAddCourseMutation,
   useAddContentToCourseMutation,
+  useGetAllContentQuery, // Exporting the new query hook
 } = courseApi;

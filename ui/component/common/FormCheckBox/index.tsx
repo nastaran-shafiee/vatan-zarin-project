@@ -1,30 +1,36 @@
 'use client';
-import { Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { Checkbox, FormControlLabel } from '@mui/material';
 
-const FormCheckBox = ({ ...props }: { name: string; label?: string }) => {
+const FormCheckBox = ({ name, label }: { name: string; label?: string }) => {
+  const { control } = useFormContext(); // دریافت کنترل فرم
+
   return (
     <Controller
-      name={props.name as string}
+      name={name}
+      control={control} // اتصال به فرم
       render={({ field }) => (
         <FormControlLabel
           control={
             <Checkbox
               {...field}
-              checked={field.value}
+              checked={Boolean(field.value)} // تبدیل مقدار به بولین
+              onChange={(e) => field.onChange(e.target.checked)} // مقدار را به درستی آپدیت کن
               sx={{
-                borderRadius: '8px', // تنظیم Border Radius چک‌باکس
-                padding: 0, // تنظیم فاصله داخلی چک‌باکس
+                borderRadius: '8px',
+                padding: 0,
               }}
             />
           }
-          label={props.label ? props.label : ''}
+          label={label || ''}
           sx={{
-            gap: '8px', // فاصله بین چک‌باکس و لیبل
+            gap: '8px',
           }}
         />
       )}
     />
   );
 };
+
 export default FormCheckBox;
+
