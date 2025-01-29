@@ -45,12 +45,16 @@ const CourseManagement = () => {
     useGetAllLanguageQuery();
   const { data: ranks, isLoading: isRanksLoading } = useGetAllRankQuery();
   const [addCourse, { isLoading: isSubmitting }] = useAddCourseMutation();
+  const [courseId, setCourseId] = useState<string | null>(null);
+
   const onSubmit = async (data: any) => {
     try {
       const response = await addCourse(data).unwrap(); // ارسال درخواست به API
   
       if (response?.isSuccess) { // اگر کد پاسخ 200 باشد
         setShowAddContent(true); // AddContent نمایش داده شود
+        setCourseId(response?.result?.courseId); // ذخیره courseId
+
       } else {
         alert(t("Unexpected_response_code")); // اگر کد پاسخ متفاوت بود، پیام مناسب نمایش دهید
       }
@@ -81,8 +85,8 @@ const CourseManagement = () => {
         customNode={<ArrowForwardIosIcon width="28px" height="28px" />}
       />
       {/* نمایش AddContent بعد از ارسال موفقیت‌آمیز فرم */}
-      {!showAddContent ? (
-        <AddContent />
+      {showAddContent ? (
+        <AddContent courseId={courseId} />
       ) : (
         <AddCover
         {...addCoverProps}

@@ -153,6 +153,9 @@ const AddCover: React.FC<AddCoverProps> = ({
               bgcolor: "background.paper",
               paddingX: "8px",
               paddingY: "24px",
+              position: "sticky",
+              bottom: 0,
+              width: "100%",
             }}
           >
             <Button

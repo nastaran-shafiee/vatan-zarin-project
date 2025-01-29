@@ -2,6 +2,7 @@
 import Header from "#/ui/component/common/Header";
 import {
   Box,
+  Button,
   Container,
   Grid,
   Modal,
@@ -9,21 +10,42 @@ import {
   useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useGetAllContentQuery } from "#/redux/services/CoursesApi";
 import ContainerRepositoryBox from "./containerRepositoryBox";
+import { useForm, FormProvider } from "react-hook-form";
 
 type PropType = {
   open: boolean;
   handleOpen: () => void;
 };
 
-const ContentRepositoryModal: FC<PropType> = ({ handleOpen, open }) => {
+const ContentRepositoryModal: FC<PropType> = ({
+  handleOpen,
+  open,
+  selectedItems,
+  setSelectedItems,
+}) => {
   const t = useTranslations();
   const theme = useTheme();
   const { data, isLoading, isError } = useGetAllContentQuery();
-console.log(data,"data")
+
+  const handleSelectItem = (
+    contentItem: CourseItemType,
+    isChecked: boolean
+  ) => {
+    setSelectedItems((prev) => {
+      return isChecked
+        ? [...prev, contentItem] // ذخیره کل آبجکت
+        : prev.filter((item) => item.contentId !== contentItem.contentId); // حذف آبجکت
+    });
+
+    // انتقال handleOpen خارج از setState
+  };
+
+  const methods = useForm(); // مقداردهی صحیح `useForm()`
+
   const style = {
     position: "absolute",
     top: "50%",
@@ -34,103 +56,63 @@ console.log(data,"data")
     bgcolor: theme.palette.grey[300],
     px: 0,
     minHeight: "100vh",
-    overflow: "hidden",
     overflowY: "auto",
-    "& div:last-child": {
-      borderBottom: "0px !important",
-      mb: 0,
-      pb: 0,
-    },
   };
 
-  if (isLoading) {
-    return (
-      <Modal open={open} onClose={handleOpen}>
-        <Grid sx={style}>
-          <Container maxWidth="md" sx={{ px: 0 }}>
-            <Header
-              text={t("List_courses")}
-              isTheme={false}
-              customNode={<CloseIcon onClick={handleOpen} />} // Custom back icon
-            />
-            <Box
-              sx={{
-                marginTop: "16px",
-                marginBottom: "20px",
-                bgcolor: "background.paper",
-                paddingX: "16px",
-                paddingY: "24px",
-              }}
-            >
-              <Typography>{t("Loading...")}</Typography>
-            </Box>
-          </Container>
-        </Grid>
-      </Modal>
-    );
-  }
-
-  if (isError) {
-    return (
-      <Modal open={open} onClose={handleOpen}>
-        <Grid sx={style}>
-          <Container maxWidth="md" sx={{ px: 0 }}>
-            <Header
-              text={t("List_courses")}
-              isTheme={false}
-              customNode={<CloseIcon onClick={handleOpen} />} // Custom back icon
-            />
-            <Box
-              sx={{
-                marginTop: "16px",
-                marginBottom: "20px",
-                bgcolor: "background.paper",
-                paddingX: "16px",
-                paddingY: "24px",
-              }}
-            >
-              <Typography>{t("An error occurred while fetching data.")}</Typography>
-            </Box>
-          </Container>
-        </Grid>
-      </Modal>
-    );
-  }
-
   return (
-    <Modal
-      open={open}
-      onClose={() => {
-        handleOpen();
-      }}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-    >
+    <Modal open={open} onClose={handleOpen}>
       <Grid sx={style}>
         <Container maxWidth="md" sx={{ px: 0 }}>
           <Header
             text={t("List_courses")}
             isTheme={false}
-            customNode={<CloseIcon onClick={handleOpen} />} // Custom back icon
+            customNode={<CloseIcon onClick={handleOpen} />}
           />
-          <Box
-            sx={{
-              
-              bgcolor: "background.paper",
-            
-            }}
-          >
-            {data?.result?.map((item: any) => (
-              <ContainerRepositoryBox
-                key={item.contentId}
-                courseItems={{
-                  contentId: item.contentId,
-                  title: item.title,
-                  ownerName: item.ownerName,
-                  contentState: item.contentState,
-                }}
-              />
-            ))}
+          <Box sx={{ bgcolor: "background.paper" }}>
+            <FormProvider {...methods}>
+              <form
+                onSubmit={methods.handleSubmit(() =>
+                  console.log(selectedItems)
+                )}
+              >
+                {isLoading ? (
+                  <Typography>{t("Loading...")}</Typography>
+                ) : isError ? (
+                  <Typography>
+                    {t("An error occurred while fetching data.")}
+                  </Typography>
+                ) : (
+                  data?.result?.map((item: any) => (
+                    <ContainerRepositoryBox
+                      key={item.contentId}
+                      courseItems={item}
+                      onSelectItem={handleSelectItem}
+                    />
+                  ))
+                )}
+                <Box
+                  sx={{
+                    marginTop: "16px",
+                    bgcolor: "background.paper",
+                    paddingX: "8px",
+                    paddingY: "24px",
+                    position: "sticky",
+                    bottom: 0,
+                    width: "100%",
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{ paddingY: "7.5px" }}
+                    onClick={handleOpen}
+                  >
+                    افزودن محتوا
+                  </Button>
+                </Box>
+              </form>
+            </FormProvider>
           </Box>
         </Container>
       </Grid>
@@ -139,4 +121,3 @@ console.log(data,"data")
 };
 
 export default ContentRepositoryModal;
-
