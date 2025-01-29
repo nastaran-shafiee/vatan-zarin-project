@@ -3,23 +3,32 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { OutLinedTextField } from "#/ui/component/common/OutLinedTextField";
+import { useMemo, useState } from "react";
+import { Container } from "@mui/material";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+
 import {
   useGetAllLanguageQuery,
   useGetAllRankQuery,
   useAddCourseMutation,
 } from "#/redux/services/CoursesApi";
-import { useMemo, useState } from "react";
 import { AddContent } from "../component/addContent";
 import AddCover from "../component/addCover";
-import { Container } from "@mui/material";
 import Header from "#/ui/component/common/Header";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import { useDispatch } from "react-redux";
+import {
+  setAlert,
+  setError,
+  setMessage,
+} from "#/redux/features/snackBarHandlerSlice";
+import { CourseFormData } from "#/redux/services/CoursesApi/courseApi";
 
 const CourseManagement = () => {
-  const [showAddContent, setShowAddContent] = useState(false); // نمایش AddContent پس از ارسال موفقیت‌آمیز
+  const [showAddContent, setShowAddContent] = useState(false);
+  const [courseId, setCourseId] = useState<string | null>(null);
   const t = useTranslations();
-
+  const dispatch = useDispatch();
+  // Define validation schema using yup
   const schema = useMemo(() => {
     return yup.object({
       coverId: yup.string().required(t("F_PorKardanElzami")),
@@ -30,7 +39,8 @@ const CourseManagement = () => {
     });
   }, [t]);
 
-  const methods = useForm({
+  // Initialize form handling with react-hook-form and yup resolver
+  const methods = useForm<CourseFormData>({
     resolver: yupResolver(schema),
     reValidateMode: "onSubmit",
   });
@@ -40,29 +50,31 @@ const CourseManagement = () => {
     formState: { errors },
   } = methods;
 
-  // API hooks
+  // Fetch language and rank data using Redux Toolkit Query
   const { data: languages, isLoading: isLanguagesLoading } =
     useGetAllLanguageQuery();
   const { data: ranks, isLoading: isRanksLoading } = useGetAllRankQuery();
   const [addCourse, { isLoading: isSubmitting }] = useAddCourseMutation();
-  const [courseId, setCourseId] = useState<string | null>(null);
 
-  const onSubmit = async (data: any) => {
-    try {
-      const response = await addCourse(data).unwrap(); // ارسال درخواست به API
-  
-      if (response?.isSuccess) { // اگر کد پاسخ 200 باشد
-        setShowAddContent(true); // AddContent نمایش داده شود
-        setCourseId(response?.result?.courseId); // ذخیره courseId
-
-      } else {
-        alert(t("Unexpected_response_code")); // اگر کد پاسخ متفاوت بود، پیام مناسب نمایش دهید
-      }
-    } catch (error: any) {
-      console.error("Error adding course:", error);
-      alert(t("Error_adding_course"));
-    }
+  // Handle form submission
+  const onSubmit = async (data: CourseFormData) => {
+    const params: CourseFormData = {
+      ...data,
+    };
+    addCourse(params)
+      .unwrap()
+      .then((response) => {
+        if (response?.isSuccess) {
+          setShowAddContent(true);
+          setCourseId(response?.result?.courseId);
+        } else {
+          dispatch(setAlert(true));
+          dispatch(setError(true));
+          dispatch(setMessage(response.errors?.[0]?.message));
+        }
+      });
   };
+
   const addCoverProps = {
     methods,
     onSubmit,
@@ -74,26 +86,27 @@ const CourseManagement = () => {
     errors,
     isSubmitting,
   };
-  
+
   return (
-    <>
-    <Container maxWidth="md" sx={{ px: 0 }}>
-      {/* Header */}
+    <Container
+      maxWidth="md"
+      sx={{ px: 0, position: "relative", overflowY: "scroll" }} 
+    >
+      {/* Page Header */}
       <Header
         text={t("add_courses")}
         isTheme={false}
         customNode={<ArrowForwardIosIcon width="28px" height="28px" />}
       />
-      {/* نمایش AddContent بعد از ارسال موفقیت‌آمیز فرم */}
+
+      {/* Show AddContent after successful form submission */}
       {showAddContent ? (
+        
         <AddContent courseId={courseId} />
       ) : (
-        <AddCover
-        {...addCoverProps}
-        />
+        <AddCover {...addCoverProps} />
       )}
-         </Container>
-    </>
+    </Container>
   );
 };
 

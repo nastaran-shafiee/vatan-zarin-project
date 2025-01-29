@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Grid, Box, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useFormContext, useWatch } from "react-hook-form";
+import { useWatch, useFormContext } from "react-hook-form";
 import FormCheckBox from "#/ui/component/common/FormCheckBox";
 
 type CourseItemType = {
@@ -16,7 +16,10 @@ type Props = {
   onSelectItem: (contentItem: CourseItemType, isChecked: boolean) => void;
 };
 
-const ContainerRepositoryBox: React.FC<Props> = ({ courseItems, onSelectItem }) => {
+const ContainerRepositoryBox: React.FC<Props> = ({
+  courseItems,
+  onSelectItem,
+}) => {
   const theme = useTheme();
   const t = useTranslations();
   const formContext = useFormContext();
@@ -27,7 +30,9 @@ const ContainerRepositoryBox: React.FC<Props> = ({ courseItems, onSelectItem }) 
   }
 
   const { control } = formContext;
-  const isChecked = useWatch({ control, name: `isPublished_${courseItems.contentId}` });
+  const fieldName = `isPublished_${courseItems.contentId}`; // Unique name for each checkbox
+
+  const isChecked = useWatch({ control, name: fieldName });
 
   useEffect(() => {
     onSelectItem(courseItems, isChecked);
@@ -46,19 +51,70 @@ const ContainerRepositoryBox: React.FC<Props> = ({ courseItems, onSelectItem }) 
           paddingY: "12px",
         }}
       >
-        <FormCheckBox
-          name={`isPublished_${courseItems.contentId}`}
-          label={t("Select_cover")}
-        />
-        <Box sx={{ marginX: "42px", gap: "4px", marginBottom: "12px" }}>
-          <Typography variant="caption" fontWeight={500}>
-            <label style={{ color: theme.palette.grey[700] }}>مدرس: </label>
-            {courseItems.title}
+        {/* Fix: Use unique field name */}
+        <FormCheckBox name={fieldName} label={t("Select_cover")} />
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            marginX: "42px",
+            gap: "4px",
+            marginBottom: "12px",
+          }}
+        >
+          {/* Title */}
+          <Typography
+            variant={"caption"}
+            fontWeight={500}
+            display={"block"}
+            my={0.2}
+          >
+            <label style={{ color: theme.palette.grey[700] }}>
+              {t("Z_Teacher")}:{" "}
+            </label>
+            {courseItems?.title}
           </Typography>
-          <Typography variant="caption" fontWeight={500}>
-            <label style={{ color: theme.palette.grey[700] }}>ایجاد کننده: </label>
-            {courseItems.ownerName}
+
+          {/* Owner */}
+          <Typography
+            variant={"caption"}
+            fontWeight={500}
+            display={"block"}
+            my={0.2}
+          >
+            <label style={{ color: theme.palette.grey[700] }}>
+              {t("Owner")}:{" "}
+            </label>
+            {courseItems?.ownerName}
           </Typography>
+
+          {/* Content Tags */}
+          <Box sx={{ display: "flex", flexDirection: "row", marginY: "16px" }}>
+            <Typography
+              variant={"caption"}
+              color={theme.palette.grey[700]}
+              sx={{
+                backgroundColor:
+                  courseItems?.contentState === 1
+                    ? theme.palette.success.light
+                    : theme.palette.warning.light,
+                fontSize: "11px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                px: 1,
+                py: 0.2,
+                borderRadius: "12px",
+                marginLeft: theme.direction === "rtl" ? "5px" : "0px",
+                marginRight: theme.direction === "rtl" ? "0" : "5px",
+                marginBottom: "12px",
+              }}
+            >
+              {courseItems?.contentState === 1?
+                t("Approved") : t("Pending_approval")}
+            </Typography>
+          </Box>
         </Box>
       </Grid>
     </Grid>

@@ -1,37 +1,12 @@
-// CourseFormWithCover.tsx
+"use client";
 import React from "react";
-import { Box, Button, Container, Typography,useTheme } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { FormProvider, UseFormReturn, UseFormSetValue } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 import FormInputText from "#/ui/component/common/FormTextFiled";
 import TextFiledFileUpload from "#/ui/component/common/TextFiledFileUpload";
-
 import FormSelect from "#/ui/component/common/FormSelect";
-
-interface FormData {
-  title: string;
-  coverId: string;
-  description: string;
-  languageId: string;
-  rankId: string;
-}
-
-interface AddCoverProps {
-  methods: UseFormReturn<FormData, any, undefined>;
-  onSubmit: (data: FormData) => void;
-  isLanguagesLoading: boolean;
-  languages: any;
-  isRanksLoading: boolean;
-  ranks: any;
-  setValue: UseFormSetValue<FormData>; // Correctly typed setValue
-  errors: any;
-  isSubmitting: boolean;
-}
-type comboBox = {
-  languageId: string;
-  title: string;
-  rankId: string;
-};
+import { AddCoverProps } from "#/redux/services/CoursesApi/courseApi";
 
 const AddCover: React.FC<AddCoverProps> = ({
   methods,
@@ -48,56 +23,33 @@ const AddCover: React.FC<AddCoverProps> = ({
   const theme = useTheme();
 
   return (
-    
-      <>{/* Cover Upload */}
-      <Box
-        sx={{
-          marginTop: "16px",
-          marginBottom: "20px",
-          bgcolor: "background.paper",
-          paddingX: "8px",
-          paddingY: "24px",
-        }}
-      >
+    <>
+      {/* Cover Upload */}
+      <Box mt={2} mb={3} bgcolor="background.paper" px={2} py={3}>
         <TextFiledFileUpload
           sizeFile={500 * 1024}
           title={t("Course_Cover")}
-          isRequired={true}
+          isRequired
           label={t("Add_Cover")}
-          allowedFormat={ `${t("Allowed_formats_image")} , ${t("Image_Allowed_volume")}`}
-          setId={(fileId: string) => setValue("coverId", fileId)} // Set coverId in form
+          allowedFormat={`${t("Allowed_formats_image")} , ${t("Image_Allowed_volume")}`}
+          setId={(fileId) => setValue("coverId", fileId)}
           iconColor={theme.palette.secondary.main}
-
         />
       </Box>
 
       {/* Form */}
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>
-          <Box
-            sx={{
-              marginTop: "16px",
-              marginBottom: "20px",
-              bgcolor: "background.paper",
-              paddingX: "8px",
-              paddingY: "24px",
-            }}
-          >
+          <Box mt={2} mb={3} bgcolor="background.paper" px={2} py={3}>
             <Typography variant="h6">{t("Course_Information")}</Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "18px",
-                marginY: "24px",
-              }}
-            >
+
+            <Box display="flex" flexDirection="column" gap={2} my={3}>
               {/* Title */}
               <FormInputText
                 label={t("Course_Title")}
                 name="title"
-                required={true}
-                error={!!errors.title}
+                required
+                error={Boolean(errors.title)}
                 helperText={errors.title?.message}
               />
 
@@ -105,8 +57,8 @@ const AddCover: React.FC<AddCoverProps> = ({
               <FormInputText
                 label={t("Course_Description")}
                 name="description"
-                required={true}
-                error={!!errors.description}
+                required
+                error={Boolean(errors.description)}
                 helperText={errors.description?.message}
               />
 
@@ -114,12 +66,12 @@ const AddCover: React.FC<AddCoverProps> = ({
               <FormSelect
                 name="languageId"
                 label={t("Course_Language")}
-                required={true}
+                required
                 options={
                   isLanguagesLoading || !languages?.result
                     ? []
                     : languages.result.map(
-                        (lang: Omit<comboBox, "rankId">) => ({
+                        (lang: { languageId: string; title: string }) => ({
                           value: lang.languageId,
                           title: lang.title,
                         })
@@ -131,12 +83,12 @@ const AddCover: React.FC<AddCoverProps> = ({
               <FormSelect
                 name="rankId"
                 label={t("Rank")}
-                required={true}
+                required
                 options={
                   isRanksLoading || !ranks?.result
                     ? []
                     : ranks.result.map(
-                        (rank: Omit<comboBox, "languageId">) => ({
+                        (rank: { rankId: string; title: string }) => ({
                           value: rank.rankId,
                           title: rank.title,
                         })
@@ -148,21 +100,19 @@ const AddCover: React.FC<AddCoverProps> = ({
 
           {/* Submit Button */}
           <Box
-            sx={{
-              marginTop: "16px",
-              bgcolor: "background.paper",
-              paddingX: "8px",
-              paddingY: "24px",
-              position: "sticky",
-              bottom: 0,
-              width: "100%",
-            }}
+            mt={2}
+            bgcolor="background.paper"
+            px={2}
+            py={3}
+            position="sticky"
+            bottom={0}
+            width="100%"
           >
             <Button
               variant="contained"
               color="primary"
               fullWidth
-              sx={{ paddingY: "7.5px" }}
+              sx={{ py: 1 }}
               type="submit"
               disabled={isSubmitting}
             >
@@ -170,8 +120,8 @@ const AddCover: React.FC<AddCoverProps> = ({
             </Button>
           </Box>
         </form>
-      </FormProvider></>
- 
+      </FormProvider>
+    </>
   );
 };
 

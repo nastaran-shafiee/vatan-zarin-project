@@ -139,3 +139,19 @@ const palette = {
 };
 
 export default palette;
+{/* <Typography
+variant="body1"
+color="text.primary"
+fontWeight="fontWeightMedium"
+pb={1}
+sx={{
+  position: "relative",
+  "&::before": {
+    content: '"*"',
+    position: "absolute",
+    top: "-2px",
+    left: "-12px",
+    color: "error.main",
+  },
+}}
+> */}

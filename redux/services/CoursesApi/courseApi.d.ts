@@ -36,3 +36,29 @@ export interface fileUploadPropsType {
 export type response = ResponseType<getAllCourseParamType[]>;
 export type responsePublish = ResponseType<>;
 export type responseUnPublish = ResponseType<>;
+export interface CourseFormData {
+  coverId: string;
+  title: string;
+  description: string;
+  languageId: string;
+  rankId: string;
+}
+export interface FormData {
+  title: string;
+  coverId: string;
+  description: string;
+  languageId: string;
+  rankId: string;
+}
+
+export interface AddCoverProps {
+  methods: UseFormReturn<FormData>;
+  onSubmit: (data: FormData) => void;
+  isLanguagesLoading: boolean;
+  languages: any;
+  isRanksLoading: boolean;
+  ranks: any;
+  setValue: UseFormSetValue<FormData>;
+  errors: any;
+  isSubmitting: boolean;
+}

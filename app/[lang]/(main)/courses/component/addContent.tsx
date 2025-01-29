@@ -1,27 +1,44 @@
 "use client";
-import { Box, Button, Container, Typography, useTheme } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Button,
+  IconButton,
+  Typography,
+  useTheme,
+  Container,
+} from "@mui/material";
 import { useTranslations } from "next-intl";
 import AddIcon from "@mui/icons-material/Add";
-import { useState, useEffect } from "react";
 import ContentRepositoryModal from "./contentRepositoryModal";
 import { useAddContentToCourseMutation } from "#/redux/services/CoursesApi";
+import { AcademyIcon } from "#/ui/component/common/AcademyIcon";
+import SelectedItemContent from "./selectedItemContent";
+import { useRouter } from "next/navigation";
+
+// Function to get the current time in the format 'HH.MM'
+function getCurrentTime() {
+  const now = new Date();
+  const hours = now.getHours().toString().padStart(2, "0"); // Hour
+  const minutes = now.getMinutes().toString().padStart(2, "0"); // Minute
+  return `${hours}:${minutes}`;
+}
 
 export const AddContent = ({ courseId }: { courseId: string }) => {
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
-  const [addContentToCourse, { isLoading: isSubmitting }] = useAddContentToCourseMutation();
+  const [addContentToCourse, { isLoading: isSubmitting }] =
+    useAddContentToCourseMutation();
   const [open, setOpen] = useState(false);
-
+  const router = useRouter();
   const t = useTranslations();
   const theme = useTheme();
 
+  // Toggle modal visibility
   const handleOpenModal = () => {
     setOpen(!open);
   };
-
-  useEffect(() => {
-    console.log("Selected items updated:", selectedItems);
-  }, [selectedItems]);
-
+  console.log(courseId);
+  // Handle saving content
   const handleSave = async () => {
     try {
       const contentPayload = selectedItems.map((item) => ({
@@ -34,7 +51,7 @@ export const AddContent = ({ courseId }: { courseId: string }) => {
       }).unwrap();
 
       if (response?.isSuccess) {
-        alert(t("Content_added_successfully"));
+        router.push("/courses");
       } else {
         alert(t("Unexpected_response_code"));
       }
@@ -46,88 +63,76 @@ export const AddContent = ({ courseId }: { courseId: string }) => {
 
   return (
     <>
+      {/* Table of Contents Section */}
       <Box
-        sx={{
-          marginTop: "16px",
-          marginBottom: "20px",
-          bgcolor: "background.paper",
-          paddingX: "16px",
-          paddingY: "24px",
-          minHeight: "100%",
-        }}
+        component="section"
+        mt={2}
+        mb={3}
+        bgcolor="background.paper"
+        px={2}
+        py={3}
+        display="flex"
+        flexDirection="column"
+        gap={2}
       >
-        {!open && selectedItems.length > 0 && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
-            {selectedItems?.map((item) => (
-              <Box
-                key={item.contentId}
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "8px",
-                  borderRadius: "8px",
-                  backgroundColor: "#f5f5f5",
-                  boxShadow: 1,
-                }}
-              >
-                <Typography variant="body1">{item.title}</Typography>
-                <Button
-                  variant="contained"
-                  color="error"
-                  size="small"
-                  onClick={() =>
-                    setSelectedItems((prev) =>
-                      prev.filter((i) => i.contentId !== item.contentId)
-                    )
-                  }
-                >
-                  حذف
-                </Button>
-              </Box>
-            ))}
-          </Box>
-        )}
         <Typography
-          component="span"
+          variant="body1"
           color="text.primary"
           fontWeight="fontWeightMedium"
-          sx={{
-            pb: 1,
-            display: "block",
-            width: "fit-content",
-            position: "relative",
-            "&::before": {
-              content: '"*"',
+          pb={1}
+          display="block"
+          width="fit-content"
+          position="relative"
+        >
+          <Box
+            component="span"
+            sx={{
               position: "absolute",
               top: "-2px",
               left: "-12px",
               color: "error.main",
-            },
-          }}
-        >
+            }}
+          >
+            *
+          </Box>
           {t("Table_of_Contents")}
         </Typography>
+
+        {/* Show selected items if there are any */}
+        {!open && selectedItems.length > 0 && (
+          <Box display="flex" flexDirection="column" gap={1}>
+            {selectedItems?.map((item) => (
+              <SelectedItemContent
+                key={item.contentId}
+                item={item}
+                setSelectedItems={setSelectedItems}
+                getCurrentTime={getCurrentTime}
+                theme={theme}
+                t={t}
+              />
+            ))}
+          </Box>
+        )}
+
+        {/* Add Content Button */}
         <Box
-          sx={{
-            display: "flex",
-            width: { xs: "328px", md: "100%" },
-            height: "45px",
-            border: "1px dashed #E0E0E0",
-            borderRadius: "5px",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "10px",
-            cursor: "pointer",
-          }}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          minHeight={45}
+          border={1}
+          borderRadius={1}
+          gap={2}
+          sx={{ cursor: "pointer", border: "1px dashed #E0E0E0" }}
           onClick={handleOpenModal}
         >
           <AddIcon sx={{ color: theme.palette.grey[700] }} />
-          <Typography component="span" color={theme.palette.grey[700]}>
-            {t("add-contetn")}
+          <Typography color={theme.palette.grey[700]}>
+            {t("add-content")}
           </Typography>
         </Box>
 
+        {/* Content Repository Modal */}
         {open && (
           <ContentRepositoryModal
             open={open}
@@ -138,27 +143,28 @@ export const AddContent = ({ courseId }: { courseId: string }) => {
         )}
       </Box>
 
+      {/* Save Button */}
       <Box
+        component="section"
         maxWidth="md"
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          width: "100%",
-          bgcolor: "background.paper",
-          paddingX: "8px",
-          paddingY: "24px",
-        }}
+        margin="0 auto"
+        position="fixed"
+        bottom={0}
+        width={{ xs: "360px", md: "790px" }}
+        bgcolor="background.paper"
+        px={2}
+        py={3}
+        zIndex={10}
       >
         <Button
           variant="contained"
           color="primary"
           fullWidth
-          sx={{ paddingY: "7.5px" }}
           onClick={handleSave}
           disabled={isSubmitting}
+          sx={{ py: 1 }}
         >
-          ذخیره
+          {t("S_Save")}
         </Button>
       </Box>
     </>
