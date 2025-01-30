@@ -16,6 +16,7 @@ export const courseApi = createApi({
   }),
   tagTypes: ["getAllCourse", "getAllRank", "getAllLanguage", "getAllContent"],
   endpoints: (builder) => ({
+    // Fetch all courses
     getAllCourse: builder.query<response, void>({
       query: () => ({
         url: `/getAllCourse`,
@@ -23,6 +24,8 @@ export const courseApi = createApi({
       }),
       providesTags: ["getAllCourse"],
     }),
+
+    // Fetch all ranks
     getAllRank: builder.query<response, void>({
       query: () => ({
         url: `/getAllRank`,
@@ -30,6 +33,8 @@ export const courseApi = createApi({
       }),
       providesTags: ["getAllRank"],
     }),
+
+    // Fetch all languages
     getAllLanguage: builder.query<response, void>({
       query: () => ({
         url: `/getAllLanguage`,
@@ -37,6 +42,8 @@ export const courseApi = createApi({
       }),
       providesTags: ["getAllLanguage"],
     }),
+
+    // Publish a course
     publish: builder.mutation<responsePublish, CourseIdParamsType>({
       query: ({ courseId }: CourseIdParamsType) => ({
         url: `/${courseId}/publish`,
@@ -45,6 +52,7 @@ export const courseApi = createApi({
       invalidatesTags: ["getAllCourse"],
     }),
 
+    // Unpublish a course
     unPublish: builder.mutation<responseUnPublish, CourseIdParamsType>({
       query: ({ courseId }: CourseIdParamsType) => ({
         url: `/${courseId}/unPublish`,
@@ -52,7 +60,8 @@ export const courseApi = createApi({
       }),
       invalidatesTags: ["getAllCourse"],
     }),
-    // New endpoint: getAllContent
+
+    // Fetch all content
     getAllContent: builder.query<response, void>({
       query: () => ({
         url: `/getAllContent`,
@@ -60,6 +69,8 @@ export const courseApi = createApi({
       }),
       providesTags: ["getAllContent"],
     }),
+
+    // Upload a file
     uploadFile: builder.mutation<response, FormData>({
       query: (formData) => ({
         url: `/upload`,
@@ -67,6 +78,8 @@ export const courseApi = createApi({
         body: formData,
       }),
     }),
+
+    // Add a new course
     addCourse: builder.mutation<
       response,
       {
@@ -84,6 +97,8 @@ export const courseApi = createApi({
       }),
       invalidatesTags: ["getAllCourse"],
     }),
+
+    // Add content to a course
     addContentToCourse: builder.mutation<
       response,
       {
@@ -94,6 +109,42 @@ export const courseApi = createApi({
       query: (body) => ({
         url: `/addContentToCourse`,
         method: "POST",
+        body,
+      }),
+      invalidatesTags: ["getAllCourse"],
+    }),
+    // Fetch a specific course by courseId
+    getCourseById: builder.query<response, CourseIdParamsType>({
+      query: ({ courseId }) => ({
+        url: `/getCourseById/${courseId}`, // Adjust this endpoint URL as needed
+        method: "GET",
+      }),
+      providesTags: ["getAllCourse"],
+    }),
+  // Fetch course content by courseId
+  getCourseContentById: builder.query<response, CourseIdParamsType>({
+    query: ({ courseId }) => ({
+      url: `/${courseId}/getContent`,
+      method: "GET",
+    }),
+    providesTags: ["getAllContent"],
+  }),
+    // Update course details
+    updateCourse: builder.mutation<
+      response,
+      {
+        coverImageAddressId: string;
+        demoAddressId: string;
+        title: string;
+        description: string;
+        languageId: string;
+        rankId: string;
+        courseId: string ;
+      }
+    >({
+      query: (body) => ({
+        url: `/update`,
+        method: "PUT",
         body,
       }),
       invalidatesTags: ["getAllCourse"],
@@ -110,5 +161,8 @@ export const {
   useUploadFileMutation,
   useAddCourseMutation,
   useAddContentToCourseMutation,
-  useGetAllContentQuery, // Exporting the new query hook
+  useGetAllContentQuery,
+  useUpdateCourseMutation,
+  useGetCourseByIdQuery,
+  useGetCourseContentByIdQuery
 } = courseApi;

@@ -6,7 +6,7 @@ import { FormProvider } from "react-hook-form";
 import FormInputText from "#/ui/component/common/FormTextFiled";
 import TextFiledFileUpload from "#/ui/component/common/TextFiledFileUpload";
 import FormSelect from "#/ui/component/common/FormSelect";
-import { AddCoverProps } from "#/redux/services/CoursesApi/courseApi";
+import { AddCoverProps } from "../corses";
 
 const AddCover: React.FC<AddCoverProps> = ({
   methods,
@@ -18,10 +18,11 @@ const AddCover: React.FC<AddCoverProps> = ({
   setValue,
   errors,
   isSubmitting,
+  courseItems,
 }) => {
   const t = useTranslations();
   const theme = useTheme();
-
+  console.log
   return (
     <>
       {/* Cover Upload */}
@@ -34,9 +35,9 @@ const AddCover: React.FC<AddCoverProps> = ({
           allowedFormat={`${t("Allowed_formats_image")} , ${t("Image_Allowed_volume")}`}
           setId={(fileId) => setValue("coverId", fileId)}
           iconColor={theme.palette.secondary.main}
+          previewValue={courseItems?.coverImageUrl}
         />
       </Box>
-
       {/* Form */}
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>
@@ -64,6 +65,7 @@ const AddCover: React.FC<AddCoverProps> = ({
 
               {/* Language Select */}
               <FormSelect
+                defaultValue={courseItems?.languageId}
                 name="languageId"
                 label={t("Course_Language")}
                 required
@@ -81,13 +83,15 @@ const AddCover: React.FC<AddCoverProps> = ({
 
               {/* Rank Select */}
               <FormSelect
+                selectedValue="rankId"
+                defaultValue={courseItems?.rankId}
                 name="rankId"
                 label={t("Rank")}
                 required
                 options={
                   isRanksLoading || !ranks?.result
                     ? []
-                    : ranks.result.map(
+                    : ranks?.result.map(
                         (rank: { rankId: string; title: string }) => ({
                           value: rank.rankId,
                           title: rank.title,

@@ -1,14 +1,8 @@
 import React from "react";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Theme, Typography } from "@mui/material";
 import { AcademyIcon } from "#/ui/component/common/AcademyIcon";
+import { SelectedItem, SelectedItemProps } from "../corses";
 
-type SelectedItemProps = {
-  item: any; // Adjust the type based on your item structure
-  setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
-  getCurrentTime: () => string;
-  theme: any;
-  t: (key: string) => string; // For translations
-};
 
 const SelectedItemContent: React.FC<SelectedItemProps> = ({
   item,
@@ -19,7 +13,7 @@ const SelectedItemContent: React.FC<SelectedItemProps> = ({
 }) => {
   return (
     <Box
-      key={item.contentId}
+      key={item?.contentId}
       display="flex"
       justifyContent="space-between"
       alignItems="center"
@@ -31,7 +25,7 @@ const SelectedItemContent: React.FC<SelectedItemProps> = ({
     >
       <Box display="flex" flexDirection="column">
         <Typography variant="body1" mb={1}>
-          {item.title}
+          {item?.title}
         </Typography>
         <Box display="flex" flexDirection="row" gap={1}>
           <IconButton
@@ -44,9 +38,9 @@ const SelectedItemContent: React.FC<SelectedItemProps> = ({
           <Typography
             component="span"
             bgcolor={
-              item.contentState === 1
-                ? theme.palette.success.light
-                : theme.palette.warning.light
+              item?.contentState === 1
+                ? theme.palette.badge.state1
+                : theme.palette.badge.state8
             }
             fontSize="11px"
             display="inline-flex"
@@ -58,14 +52,14 @@ const SelectedItemContent: React.FC<SelectedItemProps> = ({
             ml={theme.direction === "rtl" ? "5px" : "0"}
             mr={theme.direction === "rtl" ? "0" : "5px"}
           >
-            {item.contentState === 1 ? t("Approved") : t("Pending_approval")}
+            {item?.contentState === 1 ? t("Approved") : t("Pending_approval")}
           </Typography>
         </Box>
       </Box>
       <IconButton
         onClick={() =>
-          setSelectedItems((prev) =>
-            prev.filter((i) => i.contentId !== item.contentId)
+          setSelectedItems((prev:SelectedItem[]) =>
+            prev.filter((i) => i?.contentId !== item?.contentId)
           )
         }
       >

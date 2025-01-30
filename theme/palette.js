@@ -91,6 +91,8 @@ const palette = {
     state5: referenceColors['badgeState5'],
     state6: referenceColors['badgeState6'],
     state7: referenceColors['badgeState7'],
+    state8: referenceColors['Yellow11'],
+
     onBadgeWarning: referenceColors['Yellow40'],
   },
   progress: {

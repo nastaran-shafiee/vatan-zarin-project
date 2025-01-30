@@ -1,69 +1,87 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Button,
-  IconButton,
-  Typography,
-  useTheme,
-  Container,
-} from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import AddIcon from "@mui/icons-material/Add";
 import ContentRepositoryModal from "./contentRepositoryModal";
-import { useAddContentToCourseMutation } from "#/redux/services/CoursesApi";
-import { AcademyIcon } from "#/ui/component/common/AcademyIcon";
-import SelectedItemContent from "./selectedItemContent";
+import {
+  useAddContentToCourseMutation,
+  useGetCourseContentByIdQuery,
+} from "#/redux/services/CoursesApi";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "#/redux/hooks";
+import {
+  setAlert,
+  setError,
+  setMessage,
+} from "#/redux/features/snackBarHandlerSlice";
+import { AddContentProps, CourseItemType } from "../corses";
+import SelectedItemContent from "./selectedItemContent";
 
-// Function to get the current time in the format 'HH.MM'
+// Function to get the current time
 function getCurrentTime() {
   const now = new Date();
-  const hours = now.getHours().toString().padStart(2, "0"); // Hour
-  const minutes = now.getMinutes().toString().padStart(2, "0"); // Minute
-  return `${hours}:${minutes}`;
+  return `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
 }
 
-export const AddContent = ({ courseId }: { courseId: string }) => {
-  const [selectedItems, setSelectedItems] = useState<any[]>([]);
+export const AddContent: React.FC<AddContentProps> = ({
+  courseId,
+  isEditMode,
+}) => {
+  const [selectedItems, setSelectedItems] = useState<CourseItemType[]>([]);
   const [addContentToCourse, { isLoading: isSubmitting }] =
     useAddContentToCourseMutation();
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const t = useTranslations();
   const theme = useTheme();
+  const dispatch = useAppDispatch();
 
-  // Toggle modal visibility
+  // Fetch course content in edit mode
+  const { data: courseContent, isSuccess } = useGetCourseContentByIdQuery(
+    { courseId: courseId ?? "" },
+    { skip: !isEditMode || !courseId } // Execute request only in edit mode
+  );
+
+  useEffect(() => {
+    if (isSuccess && courseContent?.isSuccess) {
+      setSelectedItems(courseContent?.result as unknown as CourseItemType[]);
+    }
+  }, [courseContent, isSuccess]);
+
+  // Open and close modal
   const handleOpenModal = () => {
     setOpen(!open);
   };
-  console.log(courseId);
-  // Handle saving content
+
+  // Save content
   const handleSave = async () => {
-    try {
-      const contentPayload = selectedItems.map((item) => ({
-        contentId: item.contentId,
-      }));
-
-      const response = await addContentToCourse({
-        courseId,
-        contents: contentPayload,
-      }).unwrap();
-
-      if (response?.isSuccess) {
-        router.push("/courses");
-      } else {
-        alert(t("Unexpected_response_code"));
-      }
-    } catch (error) {
-      console.error("Error adding content to course:", error);
-      alert(t("Error_adding_content"));
+    if (!courseId) {
+      alert(t("Course_ID_is_missing"));
+      return;
     }
+    const contentPayload = selectedItems?.map((item: CourseItemType) => ({
+      contentId: item.contentId ?? "",
+    }));
+    addContentToCourse({
+      courseId,
+      contents: contentPayload,
+    })
+      .unwrap()
+      .then((response) => {
+        if (response?.isSuccess) {
+          router.push("/courses");
+        } else {
+          dispatch(setAlert(true));
+          dispatch(setError(true));
+          dispatch(setMessage(t(response.errors?.[0]?.message)));
+        }
+      });
   };
 
   return (
     <>
-      {/* Table of Contents Section */}
+      {/* Content list section */}
       <Box
         component="section"
         mt={2}
@@ -74,6 +92,7 @@ export const AddContent = ({ courseId }: { courseId: string }) => {
         display="flex"
         flexDirection="column"
         gap={2}
+        maxHeight={"100vh"}
       >
         <Typography
           variant="body1"
@@ -86,24 +105,22 @@ export const AddContent = ({ courseId }: { courseId: string }) => {
         >
           <Box
             component="span"
-            sx={{
-              position: "absolute",
-              top: "-2px",
-              left: "-12px",
-              color: "error.main",
-            }}
+            position="absolute"
+            top="-2px"
+            left="-12px"
+            color="error.main"
           >
             *
           </Box>
           {t("Table_of_Contents")}
         </Typography>
 
-        {/* Show selected items if there are any */}
+        {/* Display selected items */}
         {!open && selectedItems.length > 0 && (
           <Box display="flex" flexDirection="column" gap={1}>
             {selectedItems?.map((item) => (
               <SelectedItemContent
-                key={item.contentId}
+                key={item?.contentId}
                 item={item}
                 setSelectedItems={setSelectedItems}
                 getCurrentTime={getCurrentTime}
@@ -114,7 +131,7 @@ export const AddContent = ({ courseId }: { courseId: string }) => {
           </Box>
         )}
 
-        {/* Add Content Button */}
+        {/* Add content button */}
         <Box
           display="flex"
           alignItems="center"
@@ -132,7 +149,7 @@ export const AddContent = ({ courseId }: { courseId: string }) => {
           </Typography>
         </Box>
 
-        {/* Content Repository Modal */}
+        {/* Content selection modal */}
         {open && (
           <ContentRepositoryModal
             open={open}
@@ -143,7 +160,7 @@ export const AddContent = ({ courseId }: { courseId: string }) => {
         )}
       </Box>
 
-      {/* Save Button */}
+      {/* Save button */}
       <Box
         component="section"
         maxWidth="md"

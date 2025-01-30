@@ -3,13 +3,8 @@ import { Grid, Box, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useWatch, useFormContext } from "react-hook-form";
 import FormCheckBox from "#/ui/component/common/FormCheckBox";
+import { CourseItemType } from "../corses";
 
-type CourseItemType = {
-  contentId: string;
-  title: string;
-  ownerName: string;
-  contentState: number;
-};
 
 type Props = {
   courseItems: CourseItemType;
@@ -28,7 +23,7 @@ const ContainerRepositoryBox: React.FC<Props> = ({
     console.warn("⚠ FormProvider مقداردهی نشده است!");
     return null;
   }
-
+  console.log(courseItems);
   const { control } = formContext;
   const fieldName = `isPublished_${courseItems.contentId}`; // Unique name for each checkbox
 
@@ -49,19 +44,19 @@ const ContainerRepositoryBox: React.FC<Props> = ({
           display: "flex",
           flexDirection: "column",
           paddingY: "12px",
+          marginX:theme.direction === "rtl" ? "0" : "20px",
+          overflowX:"hidden"
         }}
       >
         {/* Fix: Use unique field name */}
         <FormCheckBox name={fieldName} label={t("Select_cover")} />
 
         <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            marginX: "42px",
-            gap: "4px",
-            marginBottom: "12px",
-          }}
+          display="flex"
+          flexDirection="column"
+          marginX={theme.direction === "rtl" ? "42px" : "20px"}
+          gap="4px"
+          marginBottom="12px"
         >
           {/* Title */}
           <Typography
@@ -90,15 +85,15 @@ const ContainerRepositoryBox: React.FC<Props> = ({
           </Typography>
 
           {/* Content Tags */}
-          <Box sx={{ display: "flex", flexDirection: "row", marginY: "16px" }}>
+          <Box display="flex" flexDirection="row" marginY="16px">
             <Typography
               variant={"caption"}
               color={theme.palette.grey[700]}
               sx={{
                 backgroundColor:
                   courseItems?.contentState === 1
-                    ? theme.palette.success.light
-                    : theme.palette.warning.light,
+                  ? theme.palette.badge.state1
+                  : theme.palette.badge.state8,
                 fontSize: "11px",
                 display: "inline-flex",
                 alignItems: "center",
@@ -111,8 +106,9 @@ const ContainerRepositoryBox: React.FC<Props> = ({
                 marginBottom: "12px",
               }}
             >
-              {courseItems?.contentState === 1?
-                t("Approved") : t("Pending_approval")}
+              {courseItems?.contentState === 1
+                ? t("Approved")
+                : t("Pending_approval")}
             </Typography>
           </Box>
         </Box>

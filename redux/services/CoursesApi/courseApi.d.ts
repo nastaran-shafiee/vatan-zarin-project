@@ -5,7 +5,7 @@ type user = {
   password: string;
 };
 type getAllCourseParamType = {
-  courseId: string;
+  courseId?: any;
   title: string;
   coverImageUrl: string;
   ownerName: string;
@@ -15,7 +15,7 @@ type getAllCourseParamType = {
   rankTitle: string;
 };
 export type CourseIdParamsType = {
-  courseId: number;
+  courseId?: string;
 };
 
 export type uploadFileResponse = ResponseType<{
@@ -33,7 +33,7 @@ export interface fileUploadPropsType {
   files?: File[] | null | string;
 }
 
-export type response = ResponseType<getAllCourseParamType[]>;
+export type response = ResponseType<getAllCourseParamType>;
 export type responsePublish = ResponseType<>;
 export type responseUnPublish = ResponseType<>;
 export interface CourseFormData {
@@ -42,6 +42,7 @@ export interface CourseFormData {
   description: string;
   languageId: string;
   rankId: string;
+ 
 }
 export interface FormData {
   title: string;
@@ -51,14 +52,4 @@ export interface FormData {
   rankId: string;
 }
 
-export interface AddCoverProps {
-  methods: UseFormReturn<FormData>;
-  onSubmit: (data: FormData) => void;
-  isLanguagesLoading: boolean;
-  languages: any;
-  isRanksLoading: boolean;
-  ranks: any;
-  setValue: UseFormSetValue<FormData>;
-  errors: any;
-  isSubmitting: boolean;
-}
+
