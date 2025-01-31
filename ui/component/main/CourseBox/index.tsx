@@ -27,21 +27,25 @@ import Switch from "@mui/material/Switch";
 import SafeDeleteModal from "../SafeDeleteModal";
 import { getAllCourseParamType } from "#/redux/services/CoursesApi/courseApi";
 import { AcademyIcon } from "../../common/AcademyIcon";
+import { useParams, useRouter } from "next/navigation";
 
 export default function CourseBox({
   courseItems,
 }: {
   courseItems: getAllCourseParamType;
 }) {
+  console.log(courseItems,"courseItems");
   const theme = useTheme();
   const t = useTranslations();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const { lang } = useParams();
 
   const [openUnPublishedModal, setOpenUnPublishedModal] = useState(false);
   const [openPublishedModal, setOpenPublishedModal] = useState(false);
   const [published, { isLoading: isPublish }] = usePublishMutation();
   const [unPublished, { isLoading: isUnPublished }] = useUnPublishMutation();
+  const router = useRouter();
 
   const dispatch = useAppDispatch();
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -197,14 +201,26 @@ export default function CourseBox({
                     "& .MuiList-root.MuiMenu-list": { py: 0.5, px: 0 },
                   }}
                 >
-                  <MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      if (courseItems?.courseId) {
+                        // تبدیل courseItems به رشته JSON
+                        const courseItemsString = JSON.stringify(courseItems);
+
+                        // ارسال به صفحه‌ی بعدی با query parameter
+                        router.push(
+                          `/${lang}/courses/${courseItems.courseId}?courseItems=${encodeURIComponent(courseItemsString)}`
+                        );
+                      }
+                    }}
+                  >
                     <Typography
                       variant="caption"
-                      display={"flex"}
+                      display="flex"
                       fontWeight={500}
-                      alignItems={"center"}
+                      alignItems="center"
                     >
-                      <AcademyIcon fontSize={"20px"} src={"icon-pen"} />{" "}
+                      <AcademyIcon fontSize="20px" src="icon-pen" />
                       {t("H_Virayesh")}
                     </Typography>
                   </MenuItem>

@@ -2,12 +2,13 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import { Checkbox, FormControlLabel } from '@mui/material';
 
-const FormCheckBox = ({ name, label }: { name: string; label?: string }) => {
+const FormCheckBox = ({ name, label, defaultChecked }: { name: string; label?: string ,defaultChecked?:string|boolean}) => {
   const { control } = useFormContext(); // دریافت کنترل فرم
 
   return (
     <Controller
       name={name}
+      defaultValue={defaultChecked || false} // تنظیم مقدار پیش‌فرض
       control={control} // اتصال به فرم
       render={({ field }) => (
         <FormControlLabel

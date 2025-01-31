@@ -10,25 +10,16 @@ import {
   useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import { useTranslations } from "next-intl";
 import { useGetAllContentQuery } from "#/redux/services/CoursesApi";
 import ContainerRepositoryBox from "./containerRepositoryBox";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
+import { ContentRepositoryModalProps, CourseItemType } from "../corses";
+import { AcademyIcon } from "#/ui/component/common/AcademyIcon";
+import { divIcon } from "leaflet";
 
 // Type for the content item
-interface CourseItemType {
-  contentId: string;
-  title: string;
-  description: string;
-}
-
-interface ContentRepositoryModalProps {
-  open: boolean;
-  handleOpen: () => void;
-  selectedItems: CourseItemType[];
-  setSelectedItems: React.Dispatch<React.SetStateAction<CourseItemType[]>>;
-}
 
 const ContentRepositoryModal: FC<ContentRepositoryModalProps> = ({
   open,
@@ -45,7 +36,7 @@ const ContentRepositoryModal: FC<ContentRepositoryModalProps> = ({
     contentItem: CourseItemType,
     isChecked: boolean
   ) => {
-    setSelectedItems((prev) => {
+    setSelectedItems((prev: CourseItemType[]) => {
       return isChecked
         ? [...prev, contentItem] // Add the item if checked
         : prev.filter((item) => item.contentId !== contentItem.contentId); // Remove the item if unchecked
@@ -72,9 +63,9 @@ const ContentRepositoryModal: FC<ContentRepositoryModalProps> = ({
       <Grid sx={style}>
         <Container maxWidth="md" sx={{ px: 0, overflowY: "scroll" }}>
           <Header
-            text={selectedItems.length > 0 ? t("Z_Add_Contents") : ""}
+            text={selectedItems?.length ?? 0 > 0 ? t("Z_Add_Contents") : ""}
             isTheme={false}
-            customNode={<CloseIcon onClick={handleOpen} />}
+            customNode={<div onClick={handleOpen}><AcademyIcon src={"icon-x-mark"}/></div>}
           />
           <Box sx={{ bgcolor: "background.paper" }}>
             <FormProvider {...methods}>
@@ -87,20 +78,22 @@ const ContentRepositoryModal: FC<ContentRepositoryModalProps> = ({
                 {isLoading ? (
                   <Typography>{t("Loading...")}</Typography>
                 ) : isError ? (
-                  <Typography>{t("An error occurred while fetching data.")}</Typography>
-                ) : (
-                  // Map through the fetched content items and render them
-                  data?.result?.map((item: CourseItemType) => (
+                  <Typography>
+                    {t("An error occurred while fetching data.")}
+                  </Typography>
+                ) : // Map through the fetched content items and render them
+                Array.isArray(data?.result) ? (
+                  data?.result.map((item: CourseItemType) => (
                     <ContainerRepositoryBox
                       key={item.contentId}
                       courseItems={item}
                       onSelectItem={handleSelectItem}
                     />
                   ))
-                )}
+                ) : null}
 
                 {/* Show a button if there are selected items */}
-                {selectedItems.length > 0 && (
+                {(selectedItems?.length ?? 0) > 0 && (
                   <Box
                     component="section"
                     maxWidth="md"

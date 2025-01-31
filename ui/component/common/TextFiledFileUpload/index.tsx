@@ -75,57 +75,58 @@ const TextFiledFileUpload = ({
   }, [previewValue]);
 
   const fileUploader = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const _files = Array.from(event.target.files);
-
-      // Check file size
-      const oversizedFiles = _files.filter((file) => file.size > sizeFile);
-
-      if (oversizedFiles.length > 0) {
-        const fileSizeInKB = oversizedFiles[0].size / 1024; // Convert to KB
-        const fileSizeInMB = fileSizeInKB / 1024; // Convert to MB
-
-        // Dynamically create the size message
-        const sizeMessage = fileSizeInMB >= 1
-          ? `${fileSizeInMB.toFixed(2)} MB`
-          : `${fileSizeInKB.toFixed(2)} KB`;
-
-        dispatch(setAlert(true));
-        dispatch(setError(true));
-        dispatch(setMessage(t("limit_exceeded", { size: sizeMessage }))); // Dynamically set the message
-        return;
-      }
-
-      setPending(true);
-
-      (accept &&
-        accept?.includes(
-          event?.target?.files[0].type.split("/").slice(0, 2)[1]
-        )) ||
+    if (!event.target.files || event.target.files.length === 0) {
+      dispatch(setAlert(true));
+      dispatch(setError(true));
+      dispatch(setMessage(t("F_EntekhabElzami"))); // Show required selection message
+      return;
+    }
+  
+    const _files = Array.from(event.target.files);
+  
+    // Check file size
+    const oversizedFiles = _files.filter((file) => file.size > sizeFile);
+    if (oversizedFiles.length > 0) {
+      const fileSizeInKB = oversizedFiles[0].size / 1024; // Convert to KB
+      const fileSizeInMB = fileSizeInKB / 1024; // Convert to MB
+  
+      // Dynamically create the size message
+      const sizeMessage =
+        fileSizeInMB >= 1 ? `${fileSizeInMB.toFixed(2)} MB` : `${fileSizeInKB.toFixed(2)} KB`;
+  
+      dispatch(setAlert(true));
+      dispatch(setError(true));
+      dispatch(setMessage(t("limit_exceeded", { size: sizeMessage }))); // Show size error message
+      return;
+    }
+  
+    setPending(true);
+  
+    if (
+      (accept && accept.includes(event?.target?.files[0].type.split("/").slice(0, 2)[1])) ||
       accept === undefined
-        ? uploadFile({ files: _files.map((i) => i) })
-            .unwrap()
-            .then((response: any) => {
-              if (event?.target?.files) {
-                setPreview(`https://file.pmlm.ir/${response.result.url}`);
-                setFileGuId?.(multiple ? response?.result : response.result.id);
-                setFileSize(response.result.fileSizeText);
-                setId?.(response.result.id);
-                setPending(false);
-              }
-            })
-            .catch((error: any) => {
-              setPending(false);
-              console.log(error);
-            })
-        : `$${
-            (setPending(false),
-            (dispatch(setAlert(true)),
-            dispatch(setError(true)),
-            dispatch(setMessage(t("Allowed_format")))))
-          }`;
+    ) {
+      uploadFile({ files: _files })
+        .unwrap()
+        .then((response: any) => {
+          setPreview(`https://file.pmlm.ir/${response.result.url}`);
+          setFileGuId?.(multiple ? response?.result : response.result.id);
+          setFileSize(response.result.fileSizeText);
+          setId?.(response.result.id);
+          setPending(false);
+        })
+        .catch((error: any) => {
+          setPending(false);
+          console.log(error);
+        });
+    } else {
+      setPending(false);
+      dispatch(setAlert(true));
+      dispatch(setError(true));
+      dispatch(setMessage(t("Allowed_format"))); // Show format error message
     }
   };
+  
 
   return (
     <Grid item xs={12} sx={{ p: 1, width: "100%" }}>
